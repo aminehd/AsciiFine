@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "tunedgemini"
+version = "0.1.0"
+description = "A module for fine-tuning Gemini models on Vertex AI with ASCII art generation"
+authors = ["Amineh Dadsetan <amineh.dadsetan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+google-cloud-aiplatform = "^1.41.0"
+vertexai = "^0.0.1"
+jupyter = "^1.0.0"
+pandas = "^2.2.0"
+datasets = "^3.5.0"
+pydantic = "^2.6.0"
+python-dotenv = "^1.0.0"
+tqdm = "^4.66.0"
+google-generativeai = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+black = "^23.12.0"
+isort = "^5.12.0"
+flake8 = "^7.0.0"
+
+[tool.poetry.scripts]
+tunedgemini = "tunedgemini.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
