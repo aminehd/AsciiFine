@@ -4,16 +4,21 @@ A simple script to test the connection to Gemini models on Vertex AI.
 """
 
 import os
-import sys
 import dotenv
-from google.cloud import aiplatform
-import vertexai
-from vertexai.language_models import TextGenerationModel
-import google.generativeai as genai
+from google import genai
+# import something from tunedgemini 
+from tunedgemini.data_loader import  sample_data, load_data
+from tunedgemini.fine_tune import fine_tune, get_tuned_model
+from tunedgemini.predict_eval import  eval_model, eval_tuned_model
+
 # Load environment variables from .env file
 dotenv.load_dotenv()
-
-def test_gemini_connection():
+system_instruct = """
+You are a classification service. You will be passed input that represents
+a newsgroup post and you must respond with the newsgroup from which the post
+originates.
+"""
+def setup_gemini_client():
     """Test connection to Gemini models on Vertex AI."""
     # Check if credentials are properly set
     credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
@@ -38,20 +43,27 @@ def test_gemini_connection():
     
     # Try to initialize Vertex AI and load the Gemini model
     print("\nInitializing Vertex AI...")
-    try:
-        vertexai.init(project=project_id, location=location)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content("The opposite of hot is")
-        print(response.text)
-    except Exception as e:
-        print(f"❌ Failed to list models: {str(e)}")
-        return False
-        
+    # api key is in .env file
+    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
+    return client
+
+
+# def ():
+
+
 
 if __name__ == "__main__":
-    if test_gemini_connection():
-        print("\n✨ Gemini model test successful! You can now use the model for fine-tuning.")
-        sys.exit(0)
-    else:
-        print("\n❌ Gemini model test failed. Please fix the issues above and try again.")
-        sys.exit(1) 
+    client = setup_gemini_client()
+    df_train, df_test = load_data()
+
+
+    df_baseline_eval = eval_model(client, df_test, "gemini-1.5-flash-001")
+    model_id = fine_tune(client, df_train, base_model="gemini-1.5-flash-001")
+    tuned_model = get_tuned_model(client, model_id)
+    print(f"Done! The model state is: {tuned_model.state.name}")
+    # The sampling here is just to minimise your quota usage. If you can, you should
+    # evaluate the whole test set with `df_model_eval = df_test.copy()`.
+    
+    
+    df_tuned_eval = eval_tuned_model(client, df_test, model_id)
+    

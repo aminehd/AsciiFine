@@ -6,9 +6,12 @@ __pycache__
 *.pyw
 *.pyz
 
+
 # env
 .env
 
+
 # logs
 logs/
-
+Archive/
+.venv/
